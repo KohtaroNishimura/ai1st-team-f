@@ -7,6 +7,11 @@ import os
 
 app = Flask(__name__)
 
+# ルートパスの定義
+@app.route("/")
+def home():
+    return "Hello, Flask!"
+
 # データファイルのパス
 data_file_path = 'jisseki6dayskakou.csv'
 
