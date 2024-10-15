@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 app = Flask(__name__)
 
 # データファイルのパス
-data_file_path = '/Users/nishimurakoutarou/Desktop/AI1st-team-f/jisseki6dayskakou.csv'
+data_file_path = '/Users/nishimurakoutarou/Desktop/ai1st-team-f/jisseki6dayskakou.csv'
 
 # データを読み込む
 data = pd.read_csv(data_file_path)
