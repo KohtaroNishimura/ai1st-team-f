@@ -1,5 +1,6 @@
 
 from flask import Flask, request, jsonify
+from flask_cors import CORS  # 追加
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
@@ -7,6 +8,7 @@ from sklearn.model_selection import train_test_split
 import os
 
 app = Flask(__name__)
+CORS(app)  # CORSを有効にする
 
 # ルートパスの定義
 @app.route("/")

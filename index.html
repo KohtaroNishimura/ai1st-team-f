@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Prediction</title>
+    <script>
+        async function uploadCSV() {
+            const fileInput = document.getElementById('csvFile');
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                // サーバーのエンドポイントにリクエストを送信
+                const response = await fetch('https://ai1st-team-f.onrender.com/predict_csv', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();  // JSON形式で結果を取得
+
+                // 結果を表示するための関数
+                displayResult(result);
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function displayResult(result) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<h3>Prediction Results:</h3>';
+            result.forEach((jobResult, index) => {
+                resultDiv.innerHTML += `<h4>Job ${index + 1}:</h4>`;
+                jobResult.forEach(machine => {
+                    resultDiv.innerHTML += `<p>Machine: ${machine.Machine}, Probability: ${machine.Probability}</p>`;
+                });
+            });
+        }
+    </script>
+</head>
+<body>
+    <h1>Upload CSV for Prediction</h1>
+    <input type="file" id="csvFile" accept=".csv" />
+    <button onclick="uploadCSV()">Upload and Predict</button>
+
+    <div id="result"></div>
+</body>
+</html>
