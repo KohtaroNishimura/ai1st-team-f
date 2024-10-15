@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
+import os
 
 app = Flask(__name__)
 
@@ -168,5 +169,7 @@ def predict():
     # 結果を返す
     return jsonify(machine_probs.to_dict(orient='records'))
 
-if __name__ == '__main__':
-    app.run(debug=True)
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))  # 環境変数 PORT からポート番号を取得
+    app.run(host="0.0.0.0", port=port)  # 0.0.0.0 にバインド
+
