@@ -1,11 +1,11 @@
-from flask import Flask, request, jsonify, Response
+
+from flask import Flask, request, jsonify
 from flask_cors import CORS  # 追加
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 import os
-import io
 
 app = Flask(__name__)
 CORS(app)  # CORSを有効にする
@@ -83,6 +83,52 @@ machine_limits = {'SMP-1': {'Type of printing': 'convex intermittent',
   'sending': 260,
   'glue killer': 0}}
 
+def filter_machines(machine_limits, job_data):
+    filtered_machines = []
+    for machine, limits in machine_limits.items():
+        match = all(job_data[key] <= limits[key] for key in job_data if key in limits)
+        if match:
+            filtered_machines.append(machine)
+    return filtered_machines
+
+@app.route('/predict', methods=['POST'])
+def predict():
+    # ジョブデータを受け取る
+    job_data = request.json
+    
+    # 上限条件を満たす機種を抽出
+    valid_machines = filter_machines(machine_limits, job_data)
+    filtered_data = data[data['Machine'].isin(valid_machines)]
+    
+    # 特徴量とラベルを設定
+    X = filtered_data[['number of colors', 'Type of printing', 'laminate', 'glue killer', 'paper width', 'sending']]
+    y = filtered_data['Machine']
+    
+    # カテゴリ変数を数値に変換
+    X = pd.get_dummies(X)
+    
+    # 訓練データとテストデータに分割
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    
+    # ランダムフォレストモデルを構築
+    model = RandomForestClassifier(random_state=42)
+    model.fit(X_train, y_train)
+    
+    # ジョブデータをデータフレーム化
+    job_df = pd.DataFrame([job_data])
+    job_df = pd.get_dummies(job_df)
+    job_df = job_df.reindex(columns=X.columns, fill_value=0)
+    
+    # 確率分布を計算
+    probabilities = model.predict_proba(job_df)[0]
+    
+    # 機種ごとの確率分布を整理
+    machine_probs = pd.DataFrame({'Machine': model.classes_, 'Probability': probabilities})
+    machine_probs = machine_probs.sort_values(by='Probability', ascending=False)
+    
+    # 結果を返す
+    return jsonify(machine_probs.to_dict(orient='records'))
+
 # CSVファイルからジョブデータを読み込み、複数行の予測結果を返すエンドポイント
 @app.route('/predict_csv', methods=['POST'])
 def predict_csv():
@@ -128,16 +174,10 @@ def predict_csv():
         machine_probs = machine_probs.sort_values(by='Probability', ascending=False)
         
         # 結果をリストに追加
-        results.append(machine_probs)
+        results.append(machine_probs.to_dict(orient='records'))
     
-    # CSVとして返す
-    output = io.StringIO()
-    combined_df = pd.concat(results)
-    combined_df.to_csv(output, index=False)
-    response = Response(output.getvalue(), mimetype='text/csv')
-    response.headers["Content-Disposition"] = "attachment; filename=predictions.csv"
-    
-    return response
+    # 結果をJSONで返す
+    return jsonify(results)
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))  # 環境変数 PORT からポート番号を取得
