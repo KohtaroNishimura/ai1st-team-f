@@ -16,7 +16,7 @@ def home():
     return "Hello Flask!"
 
 # データファイルのパス
-data_file_path = 'jisseki6dayskakouclolor.csv'
+data_file_path = 'jisseki6dayskakoucolor.csv'
 
 # データを読み込む
 data = pd.read_csv(data_file_path)
