@@ -32,15 +32,20 @@
         }
 
         function displayResult(result) {
-            const resultDiv = document.getElementById('result');
-            resultDiv.innerHTML = '<h3>Prediction Results:</h3>';
-            result.forEach((jobResult, index) => {
-                resultDiv.innerHTML += `<h4>Job ${index + 1}:</h4>`;
-                jobResult.forEach(machine => {
-                    resultDiv.innerHTML += `<p>Machine: ${machine.Machine}, Probability: ${machine.Probability}</p>`;
-                });
-            });
-        }
+    const resultDiv = document.getElementById('result');
+    resultDiv.innerHTML = '<h3>Prediction Results:</h3>';
+    
+    result.forEach((jobResult, index) => {
+        resultDiv.innerHTML += `<h4>Job ${index + 1}:</h4>`;
+        
+        // 上位5件のみを表示
+        const top5Results = jobResult.slice(0, 5);  // 上位5件を取得
+        
+        top5Results.forEach(machine => {
+            resultDiv.innerHTML += `<p>Machine: ${machine.Machine}, Probability: ${machine.Probability}</p>`;
+        });
+    });
+}
     </script>
 </head>
 <body>
