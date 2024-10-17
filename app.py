@@ -148,7 +148,7 @@ def predict_csv():
         filtered_data = data[data['Machine'].isin(valid_machines)]
         
         # 特徴量とラベルを設定
-        X = filtered_data[['number of colors', 'Type of printing', 'laminate', 'glue killer', 'paper width', 'sending' 'color']]
+        X = filtered_data[['number of colors', 'Type of printing', 'laminate', 'glue killer', 'paper width', 'sending' , 'color']]
         y = filtered_data['Machine']
         
         # カテゴリ変数を数値に変換
